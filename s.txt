@@ -1,0 +1,116 @@
+	oC_Match : ( OPTIONAL_ SP )? MATCH SP? oC_Pattern ( SP? 	oC_Hint )* ( SP? oC_Where )? ;
+oC_Match : 这是文法规则的标签，表示这个规则用于匹配 oC_Match 类型的元素。
+( OPTIONAL_ SP )? 表示可选的空白字符（可能是一个或多个空格、制表符等，具体取决于 OPTIONAL_SP 的定义）。? 表示前面的元素（在这里是 OPTIONAL_SP）可以出现0次或1次。
+MATCH 是字面量字符串，表示要匹配的文本“MATCH”。
+SP? 表示可选的空格（或空白字符）。SP 可能是一个规则，用于匹配单个空格或任何空白字符，而 ? 表示这个空格是可选的。
+oC_Pattern 是另一个文法规则的引用，表示 MATCH 子句后面应该跟随的模式部分。这个模式定义了要从图中检索的数据结构。
+( SP? oC_Hint )* 是一个重复组，表示可以有一个或多个 oC_Hint，每个 oC_Hint 前面都可以有可选的空格。oC_Hint 可能是用于指导查询执行方式的提示或指令，如索引使用或查询策略。
+( SP? oC_Where )? 是另一个可选组，表示 MATCH 子句后面可以跟随一个 WHERE 子句，用于进一步限制匹配的模式。oC_Where 是另一个文法规则的引用，表示 WHERE 子句的内容。
+综上所述，这个文法片段描述了 Cypher 查询语言中 MATCH 子句的结构，包括可选的开头空格、MATCH 关键字、模式部分、零个或多个提示（每个提示前可有可选空格），以及可选的 WHERE 子句（其前可有可选空格）。
+
+oC_Pattern : oC_PatternPart ( SP? ',' SP? oC_PatternPart )* ;
+这个模式通常用于 MATCH 子句中，以指定要从图中检索的数据结构。下面是对 oC_Pattern 规则的详细解释：
+oC_Pattern : 这是规则的标签，表明这个规则用于匹配 oC_Pattern 类型的元素。
+oC_PatternPart ( SP? ',' SP? oC_PatternPart )*：这个规则由两部分组成，一个基础的 oC_PatternPart 和一个可选的重复组。
+oC_PatternPart：这是另一个文法规则的引用，表示模式的一部分。在 Cypher 中，模式部分通常包括节点（Node）和关系（Relationship）的定义，例如 (a:Person)-[:KNOWS]->(b:Person)。oC_PatternPart 规则将具体定义这种结构。
+( SP? ',' SP? oC_PatternPart )*：这是一个重复组，表示可以有一个或多个额外的 oC_PatternPart，每个部分之间用逗号分隔，并且逗号前后可以有可选的空格。这允许在单个 MATCH 子句中指定多个相关的模式部分，这些部分可以是独立的模式，也可以是通过某些关系相互连接的。
+因此，整个 oC_Pattern 规则允许定义一个或多个通过逗号分隔的模式部分，每个部分都是一个独立的模式或者与其他部分通过某种关系相连。这种结构使得 Cypher 能够灵活地表达复杂的图查询，包括多个节点和关系之间的连接。
+例如，在 Cypher 查询中，MATCH (a:Person)-[:KNOWS]->(b:Person), (b)-[:WORKS_FOR]->(c:Company) 就是一个符合 oC_Pattern 规则的例子，其中包含了两个通过逗号分隔的模式部分，每个部分都定义了节点和它们之间的关系
+
+oC_PatternPart : ( oC_Variable SP? '=' SP? oC_AnonymousPatternPart )
+             | oC_AnonymousPatternPart
+             ;
+这个规则是 oC_Pattern 规则的基础，后者用于构建更复杂的模式结构。下面是对 oC_PatternPart 规则的详细解释：
+oC_PatternPart : 这是规则的标签，表明这个规则用于匹配 oC_PatternPart 类型的元素。
+规则由两部分组成，通过 | 分隔，表示两种可能的匹配方式：
+( oC_Variable SP? '=' SP? oC_AnonymousPatternPart )
+这部分定义了一个模式部分，其中包含一个变量（oC_Variable）和等号（=）后面跟着一个匿名模式部分（oC_AnonymousPatternPart）。SP? 表示在变量、等号和匿名模式部分之间可以有可选的空格。这种形式的模式部分允许你为图中的一个特定节点或关系指定一个变量名，以便在查询的其余部分引用它。
+例如，在 Cypher 查询中，(a:Person)-[:KNOWS]->() 是一个匿名模式部分，而 a = (a:Person)-[:KNOWS]->() 则是一个将变量 a 分配给该模式部分的表达式。但请注意，Cypher 实际上并不直接使用等号来分配变量；这里的等号表示方式是为了说明文法结构，而在实际 Cypher 查询中，变量名是在节点或关系的括号中直接指定的，如 (a:Person)-[:KNOWS]->(b:Person)。
+oC_AnonymousPatternPart
+这部分直接引用了一个匿名模式部分，表示模式部分可以是一个没有显式分配给变量的节点、关系或更复杂的图结构。这种形式的模式部分在 Cypher 查询中很常见，用于指定要检索的图结构，而不必为每个部分都指定一个变量名。
+综上所述，oC_PatternPart 规则允许模式部分以两种形式出现：一种是与变量关联的，另一种是没有显式与变量关联的匿名模式部分。这种灵活性使得 Cypher 能够处理各种复杂的图查询场景。
+
+oC_AnonymousPatternPart : oC_PatternElement ;
+oC_AnonymousPatternPart 规则定义了 Cypher 查询语言中匿名模式部分（Anonymous Pattern Part）的结构。这个规则是 oC_PatternPart 规则的一个可能组成部分，后者进一步构成了更复杂的模式结构。下面是对 oC_AnonymousPatternPart 规则的详细解释：
+oC_AnonymousPatternPart : 这是规则的标签，表明这个规则用于匹配匿名模式部分。
+oC_PatternElement ; 这表示匿名模式部分由一个或多个 oC_PatternElement 组成。oC_PatternElement 可能是另一个文法规则，用于定义图查询中模式的基本元素，如节点（Node）、关系（Relationship）以及它们之间的连接。
+在 Cypher 查询中，匿名模式部分通常指的是没有显式分配给变量的图结构。这些结构可以是单个节点、单个关系，或者是通过关系和属性连接起来的更复杂的图结构。由于它们没有变量名，因此无法直接在查询的后续部分中引用它们（除非它们通过其他方式间接地参与了查询的其他部分）。
+然而，匿名模式部分在查询中仍然扮演着重要的角色，因为它们定义了查询要检索的图结构。Cypher 查询引擎会遍历图数据，查找与匿名模式部分相匹配的所有实例，并根据需要返回这些实例的信息。
+
+
+oC_PatternElement : ( oC_NodePattern ( SP? oC_PatternElementChain )* )
+                | ( '(' oC_PatternElement ')' )
+                ;
+oC_PatternElement 规则定义了 Cypher 查询语言中模式元素（Pattern Element）的两种可能形式。这些模式元素是构建更复杂图模式（如 oC_AnonymousPatternPart 和 oC_Pattern）的基础。下面是对 oC_PatternElement 规则的详细解释：
+节点模式及其关系链：
+( oC_NodePattern ( SP? oC_PatternElementChain )* )
+这部分定义了一个模式元素，它以一个节点模式（oC_NodePattern）开始，后面可以跟随零个或多个通过空格分隔的模式元素链（oC_PatternElementChain）。oC_NodePattern 可能是另一个文法规则，用于定义节点的具体结构，包括其标签、属性等。oC_PatternElementChain 则可能表示与该节点相连的关系和其他节点，形成一个链状结构。
+例如，在 Cypher 查询中，(a:Person)-[:KNOWS]->(b:Person) 是一个节点模式及其关系链的例子，其中 a:Person 和 b:Person 是节点模式，-[:KNOWS]-> 是关系链的一部分。
+括号内的模式元素：
+( '(' oC_PatternElement ')' )
+这部分允许模式元素被括号包围。括号在 Cypher 中通常用于分组或指定查询的优先级，但它们也可以用于定义更复杂的模式结构，这些结构在单个模式元素中可能难以表达。被括号包围的 oC_PatternElement 可以是上面定义的任何形式，包括节点模式及其关系链或另一个括号内的模式元素。
+例如，((a:Person)-[:KNOWS]->(b:Person)) 是一个括号内的模式元素，它本身就是一个完整的模式，但在这里被当作一个更大的模式元素的一部分。
+综上所述，oC_PatternElement 规则通过提供节点模式及其关系链以及括号内的模式元素两种形式，允许在 Cypher 查询中构建灵活且复杂的图模式。这些模式元素可以相互组合，以指定要检索的图结构。
+
+
+oC_NodePattern : '(' SP? ( oC_Variable SP? )? ( oC_NodeLabels SP? )? ( oC_Properties SP? )? ')' ;
+oC_NodePattern 规则定义了 Cypher 查询语言中节点模式（Node Pattern）的结构。这个规则是构建图模式（如 oC_PatternElement、oC_AnonymousPatternPart 和 oC_Pattern）的重要部分，因为它指定了节点的表示方式，包括变量名、节点标签和属性。下面是对 oC_NodePattern 规则的详细解释：
+oC_NodePattern : 这是规则的标签，表明这个规则用于匹配节点模式。
+'(' 和 ')'：这两个符号表示节点模式被括号包围。在 Cypher 中，括号用于定义节点和关系的边界，确保它们被正确解释。
+SP?：SP 可能代表空格（Space）的简写，而 ? 表示该空格是可选的。这意味着在括号、变量名、节点标签和属性之间可以有零个或多个空格。
+( oC_Variable SP? )?：这部分是可选的，表示节点模式可以包含一个变量名。oC_Variable 是另一个文法规则，用于定义变量的结构。变量名后面可以有零个或多个空格。整个变量名部分（包括变量名和随后的空格）也是可选的，由外层的 ? 表示。
+( oC_NodeLabels SP? )?：这部分同样是可选的，表示节点模式可以包含一个或多个节点标签。oC_NodeLabels 是另一个文法规则，用于定义节点标签的列表（可能是一个或多个，具体取决于 oC_NodeLabels 的定义）。节点标签后面可以有零个或多个空格。整个节点标签部分也是可选的。
+( oC_Properties SP? )?：这部分也是可选的，表示节点模式可以包含一组属性。oC_Properties 是另一个文法规则，用于定义属性的集合。属性后面可以有零个或多个空格。整个属性部分同样是可选的。
+综上所述，oC_NodePattern 规则允许定义一个节点模式，该模式可以包含可选的变量名、节点标签和属性。这些元素共同定义了 Cypher 查询中要匹配的节点的具体结构。
+例如，在 Cypher 查询中，(a:Person {name: 'Alice'}) 是一个节点模式的例子，其中 a 是变量名，Person 是节点标签，{name: 'Alice'} 是一组属性。这个节点模式表示要匹配图中所有标签为 Person 且属性 name 的值为 'Alice' 的节点，并将这些节点与变量 a 关联起来。
+
+oC_PatternElementChain : oC_RelationshipPattern SP? oC_NodePattern ;
+该规则定义了模式元素链（Pattern Element Chain）的结构。模式元素链是图查询语言中连接两个节点模式（oC_NodePattern）的关键部分，它通过关系模式（oC_RelationshipPattern）来实现节点之间的连接。
+具体来说，oC_PatternElementChain 规则由以下部分组成：
+oC_RelationshipPattern：这是一个关系模式的实例，它描述了节点之间如何连接。关系模式可能包括关系的方向（如果有的话）、关系的类型，以及可能的属性和变量。关系模式的具体结构由 oC_RelationshipPattern 规则在其他地方定义。
+SP?：这里的 SP 可能代表空格（Space）的简写，而 ? 表示该空格是可选的。这意味着在关系模式和节点模式之间可以有零个或多个空格，以适应不同的书写习惯或格式化要求。
+oC_NodePattern：这是一个节点模式的实例，它定义了图中的一个节点。节点模式可能包括节点的标签、属性，以及用于在查询中引用该节点的变量名。节点模式的具体结构由 oC_NodePattern 规则在其他地方定义。
+因此，oC_PatternElementChain 规则整体上表示了一个从一个节点模式到另一个节点模式的连接，这个连接是通过一个关系模式来实现的。这种结构允许在图查询语言中构建复杂的图模式，以匹配具有特定关系和属性的节点集合。
+例如，在 Cypher 查询语言中，(a:Person)-[:KNOWS]->(b:Person) 是一个使用 oC_PatternElementChain 规则（及其依赖的规则）构建的查询片段。这里，(a:Person) 和 (b:Person) 是两个节点模式，分别表示两个类型为 Person 的节点，而 -[:KNOWS]-> 是一个关系模式，表示这两个节点之间存在一个类型为 KNOWS 的有向关系。整个表达式构成了一个模式元素链，用于在图数据库中查找满足这些条件的节点对。
+
+
+
+oC_RelationshipPattern : ( oC_LeftArrowHead SP? oC_Dash SP? oC_RelationshipDetail? SP? oC_Dash SP? oC_RightArrowHead )
+                       | ( oC_LeftArrowHead SP? oC_Dash SP? oC_RelationshipDetail? SP? oC_Dash )
+                       | ( oC_Dash SP? oC_RelationshipDetail? SP? oC_Dash SP? oC_RightArrowHead )
+                       | ( oC_Dash SP? oC_RelationshipDetail? SP? oC_Dash )
+                       ;
+定义了关系模式的四种可能形式。这些形式涵盖了有向和无向关系，以及是否包含关系细节（如类型、属性和变量）。下面是对这四种形式的详细解释：
+
+有向关系，包含关系细节：
+( oC_LeftArrowHead SP? oC_Dash SP? oC_RelationshipDetail? SP? oC_Dash SP? oC_RightArrowHead )
+这种形式表示一个有向关系，由左箭头头（oC_LeftArrowHead）表示起始方向，破折号（oC_Dash）表示关系的存在，关系细节（oC_RelationshipDetail）可选地包含类型、属性和变量，最后是右箭头头（oC_RightArrowHead）表示关系的结束方向。这种形式用于明确指定关系的方向和可能的细节。
+有向关系，不包含关系细节（但指向右侧）：
+( oC_LeftArrowHead SP? oC_Dash SP? oC_RelationshipDetail? SP? oC_Dash )
+这种形式与第一种类似，但没有右箭头头，表示关系指向右侧但省略了结束方向的明确标记。如果关系细节是可选的且未提供，则这种形式可能仅用于表示一个无类型或属性的有向连接。
+无向关系或关系起始部分，包含关系细节：
+( oC_Dash SP? oC_RelationshipDetail? SP? oC_Dash SP? oC_RightArrowHead )
+这种形式以一个单独的破折号开始，可能包含关系细节，并以一个可选的右箭头头结束。由于缺少左箭头头，这种形式可能表示一个无向关系（如果右箭头头也省略），或者它可能是一个有向关系的起始部分，其中关系的结束部分将在后续的模式元素链中指定。
+无向关系或简单的有向关系：
+( oC_Dash SP? oC_RelationshipDetail? SP? oC_Dash )
+这是最简单的形式，仅由两个破折号组成，可能包含关系细节。由于缺少箭头头，它表示一个无向关系，或者如果关系细节中包含了足够的信息来隐式指定方向（尽管这通常不是标准的做法），则可能表示一个有向关系。然而，在大多数情况下，这种形式被用于表示无向关系或当关系的方向不是查询的关键部分时。
+需要注意的是，这些规则的具体实现和解释可能取决于您使用的图查询语言（如 Cypher）的上下文和变体。在标准的 Cypher 语法中，关系模式通常不包含箭头头来表示方向，而是依赖于关系的类型（如 [:KNOWS]）和可能的方向关键字（如 -> 或 <-）来明确指定关系的方向和类型。然而，您给出的规则可能是为了支持一种更通用或扩展的图查询语法而设计的。
+另外，oC_RelationshipDetail 规则（未在您的原始问题中完全展开）通常包含关系类型、属性和可能的变量的定义。在 Cypher 中，关系类型通常被包含在方括号内（如 [:KNOWS]），而属性和变量则可能以不同的方式指定。
+
+
+
+oC_RelationshipDetail : '[' SP? ( oC_Variable SP? )? ( oC_RelationshipTypes SP? )? oC_RangeLiteral? ( oC_Properties SP? )? ']' ;
+在您给出的 oC_RelationshipDetail 文法规则中，定义了关系细节的结构，这些细节可以包含变量、关系类型、范围字面量（可能是用于表示关系的长度或某种范围限制，但通常不是Cypher等图查询语言的标准部分），以及属性。下面是对这个规则的详细解释：
+oC_RelationshipDetail : '[' SP? ( oC_Variable SP? )? ( oC_RelationshipTypes SP? )? oC_RangeLiteral? ( oC_Properties SP? )? ']' ;
+方括号：[ 和 ] 是关系细节的起始和结束标记。在Cypher等图查询语言中，关系类型通常被放在方括号内，但这里方括号被用来包含更广泛的关系细节。
+空格：SP? 表示零个或多个空格是可选的，这允许在方括号内部和元素之间添加空格以提高可读性。
+变量：( oC_Variable SP? )? 是一个可选的变量定义。如果存在，它可能用于在查询中引用特定的关系实例。变量后面可能有零个或多个空格。
+关系类型：( oC_RelationshipTypes SP? )? 是一个可选的关系类型定义。oC_RelationshipTypes 可能是一个规则，用于定义一种或多种关系类型的列表（可能通过某种分隔符分隔），这些类型将应用于当前关系。类型后面可能有零个或多个空格。
+范围字面量：oC_RangeLiteral? 是一个可选的范围字面量，用于表示某种范围限制，但请注意，在标准的Cypher等图查询语言中，关系通常不直接与范围字面量相关联。这个元素可能是特定于您所使用的查询语言或是一个扩展特性。
+属性：( oC_Properties SP? )? 是一个可选的属性定义。如果存在，它可能包含与关系相关联的一个或多个属性。属性后面可能有零个或多个空格。
+在Cypher等标准图查询语言中，关系模式通常只包含关系类型和（可选的）方向指示符（如箭头），以及可能的属性（通过点表示法附加到关系上，而不是在方括号内）。然而，您给出的规则提供了一种更灵活的方式来定义关系，包括可选的变量、更复杂的类型定义（可能支持类型列表）、以及非标准的范围字面量和属性定义方式。
+请注意，oC_Variable、oC_RelationshipTypes、oC_RangeLiteral 和 oC_Properties 这些规则的具体定义在您的文法中没有给出，但基于命名约定，我们可以合理推测它们的含义：
+oC_Variable 可能定义了一个变量的名称。
+oC_RelationshipTypes 可能定义了一个或多个关系类型的列表。
+oC_RangeLiteral 可能定义了一个表示范围的字面量，尽管这在标准关系模式中不常见。
+oC_Properties 可能定义了一个或多个属性的键值对列表。

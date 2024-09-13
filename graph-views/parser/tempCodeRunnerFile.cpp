@@ -1,0 +1,1 @@
+match (n:person)-[*..2]->(m:keyword) with n,m create (n)-[r:test]->(m)

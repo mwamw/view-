@@ -1,0 +1,3 @@
+/gitlab-graph-views/parser/build/CMakeFiles/CypherRewrite.dir
+/gitlab-graph-views/parser/build/CMakeFiles/edit_cache.dir
+/gitlab-graph-views/parser/build/CMakeFiles/rebuild_cache.dir
